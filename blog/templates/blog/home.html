@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+  <!-- Hero Section -->
+  <section class="hero bg-primary text-white text-center py-5">
+    <div class="container">
+      <h1 class="display-4 font-weight-bold">Welcome to Blog Platform</h1>
+      <p class="lead">Share your ideas with the world, powered by AI-driven content moderation.</p>
+      {% if user.is_authenticated %}
+        <a href="{% url 'create_post' %}" class="btn btn-light btn-lg mt-3">Create a Post</a>
+      {% else %}
+        <a href="{% url 'signup' %}" class="btn btn-light btn-lg mt-3">Get Started</a>
+      {% endif %}
+    </div>
+  </section>
+
+{% comment %} <!--Recommended posts if any-->
+{% if recommended_posts %}
+    <section class="recommended-posts py-5">
+        <div class="container">
+            <h2 class="text-center mb-4">Recommended for You</h2>
+            <div class="row">
+                {% for post in recommended_posts %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card">
+                            {% if post.picture %}
+                                <img src="{{ post.picture.url }}" class="card-img-top" alt="{{ post.title }}">
+                            {% else %}
+                                <img src="{% static 'images/placeholder.jpg' %}" class="card-img-top" alt="Placeholder">
+                            {% endif %}
+                            <div class="card-body">
+                                <h3 class="card-title">
+                                    <a href="{% url 'post_detail' post.slug %}">{{ post.title }}</a>
+                                </h3>
+                                <p class="card-text">{{ post.content|truncatewords:20 }}</p>
+                                <small class="text-muted">By {{ post.author.username }} on {{ post.created_at|date:"M d, Y" }}</small>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+{% endif %}
+{% if no_posts_message %}
+    <p class="text-center">{{ no_posts_message }}</p>
+{% endif %} {% endcomment %}
+  {% comment %} <!-- Recent Posts Section -->
+  <section class="recent-posts py-5">
+    <div class="container">
+      <h2 class="text-center mb-4">Recent Posts</h2>
+      <div class="row">
+        {% for post in recent_posts %}
+          {% if post.is_published %}
+            <div class="col-md-6 mb-4">
+              <div class="card">
+                {% if post.picture %}
+                  <img src="{{ post.picture.url }}" class="card-img-top" alt="{{ post.title }}">
+                {% else %}
+                  <img src="{% static 'images/placeholder.jpg' %}" class="card-img-top" alt="Placeholder">
+                {% endif %}
+                <div class="card-body">
+                  <h3 class="card-title">
+                    <a href="{% url 'post_detail' post.slug %}">{{ post.title }}</a>
+                  </h3>
+                  <p class="card-text">{{ post.content|truncatewords:20 }}</p>
+                  <small class="text-muted">By {{ post.author.username }} on {{ post.created_at|date:"M d, Y" }}</small>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        {% empty %}
+          <p class="text-center">No posts available. Be the first to share!</p>
+        {% endfor %}
+      </div>
+      <div class="text-center mt-4">
+        <a href="{% url 'post_list' %}" class="btn btn-primary">View All Posts</a>
+      </div>
+    </section> {% endcomment %}
+
+  <!-- Features Section -->
+<section class="features bg-light py-5">
+    <div class="container">
+        <h2 class="text-center mb-4">Why Blog Platform?</h2>
+        <p>
+        Blog Platform with Content Moderation is a web-based platform that facilitates the creation, management, and publication of blog content. These systems have evolved from simple text-based interfaces to complex platforms integrating multimedia, user interaction, and content analytics. The rise of digital media and social networking has increased the demand for efficient Blog Platform with Content Moderation, enabling individuals and organizations to share content seamlessly. Key features include content editing, user authentication, and comment moderation. The background of this study focuses on understanding the technological advancements and user needs driving Blog Platform with Content Moderation development, identifying gaps in existing systems such as scalability, user experience, and security.
+        </p>
+        <div class="row">
+            {% for feature in features %}
+                <div class="col-md-4 text-center">
+                    <i class="{{ feature.icon }} fa-3x mb-3 text-primary"></i>
+                    <h3>{{ feature.title }}</h3>
+                    <p>{{ feature.description }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="container mx-auto px-4 py-8 max-w-2xl">
+    <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">Edit Post</h2>
+    {% if messages %}
+      <ul class="messages mb-4">
+        {% for message in messages %}
+          <li class="alert alert-{{ message.tags }} p-4 rounded-lg shadow">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% if form.errors %}
+      <div class="alert alert-danger p-4 rounded-lg shadow mb-4">
+        <ul>
+          {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+              <li>{{ field }}: {{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+    <form method="post" enctype="multipart/form-data" action="{% url 'edit_post' post.slug %}" class="bg-white p-6 rounded-lg shadow-lg">
+      {% csrf_token %}
+      <div class="form-group mb-4">
+        <label for="{{ form.title.id_for_label }}" class="block font-semibold text-gray-900 text-sm mb-2">Title</label>
+        {{ form.title }}
+      </div>
+      <div class="form-group mb-4">
+        <label for="{{ form.content.id_for_label }}" class="block font-semibold text-gray-900 text-sm mb-2">Content</label>
+        {{ form.content }}
+      </div>
+      <div class="form-group mb-4">
+        <label for="{{ form.picture.id_for_label }}" class="block font-semibold text-gray-900 text-sm mb-2">Picture</label>
+        {{ form.picture }}
+      </div>
+      <div class="form-group mb-6">
+        <label for="{{ form.tags.id_for_label }}" class="block font-semibold text-gray-900 text-sm mb-2">Tags</label>
+        {{ form.tags }}
+      </div>
+      <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300 font-semibold">Save Changes</button>
+    </form>
+    <a href="{% url 'post_detail' post.slug %}" class="block text-center mt-4 text-blue-600 hover:underline text-sm">Cancel</a>
+  </div>
+{% endblock %}

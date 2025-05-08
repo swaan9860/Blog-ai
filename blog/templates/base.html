@@ -19,6 +19,22 @@
       <div class="left">
         <a href="{% url 'home' %}" class="navbar-brand">Blog Platform</a>
       </div>
+      <div class="middle">
+        {% if user.is_authenticated %} {% block search_bar %}
+        <div class="search-bar">
+          <form class="topnav" action="{% url 'search_posts' %}" method="get">
+            <input
+              type="text"
+              name="q"
+              placeholder="Search.."
+              value="{{ query|default:'' }}"
+            />
+            <button type="submit" class="btn btn-primary">Search</button>
+          </form>
+        </div>
+
+        {% endblock %} {% endif %}
+      </div>
       <div class="right">
         <!-- Desktop Navbar Links -->
         <a href="{% url 'home' %}">Home</a>
@@ -67,15 +83,8 @@
       <a href="{% url 'login' %}">Login</a>
       {% endif %}
     </div>
-    <form class="topnav" action="{% url 'search_posts' %}" method="get">
-      <input
-        type="text"
-        name="q"
-        placeholder="Search.."
-        value="{{ query|default:'' }}"
-      />
-      <button type="submit" class="btn btn-primary">Search</button>
-    </form>
+
+    {% comment %} {% endcomment %}
 
     <!-- Main Content -->
     <div class="container">{% block content %} {% endblock %}</div>
@@ -88,6 +97,7 @@
             Discover, create, and share stories with Blog Platform featuring AI
             content moderation for better content safety!
           </p>
+          {% comment %}
           <form class="topnav" action="{% url 'search_posts' %}" method="get">
             <input
               type="text"
@@ -97,6 +107,7 @@
             />
             <button type="submit" class="btn btn-primary">Search</button>
           </form>
+          {% endcomment %}
         </div>
         <div class="footer-section footer-links">
           <h3>Explore</h3>

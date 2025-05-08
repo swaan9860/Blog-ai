@@ -16,50 +16,57 @@
   <body>
     <!-- Navbar -->
     <nav class="navbar">
-      <div class="left">
-        <a href="{% url 'home' %}" class="navbar-brand">Blog Platform</a>
-      </div>
-      <div class="middle">
-        {% if user.is_authenticated %} {% block search_bar %}
-        <div class="search-bar">
-          <form class="topnav" action="{% url 'search_posts' %}" method="get">
-            <input
-              type="text"
-              name="q"
-              placeholder="Search.."
-              value="{{ query|default:'' }}"
-            />
-            <button type="submit" class="btn btn-primary">Search</button>
-          </form>
+      <div class="navbar-container">
+        <div class="left">
+          <a href="{% url 'home' %}" class="navbar-brand">Blog Platform</a>
         </div>
-
-        {% endblock %} {% endif %}
-      </div>
-      <div class="right">
-        <!-- Desktop Navbar Links -->
-        <a href="{% url 'home' %}">Home</a>
-        <a href="{% url 'post_list' %}">Posts</a>
-        {% if user.is_authenticated %}
-
-        <a href="{% url 'create_post' %}">Create Post</a>
-        <a href="{% url 'profile' %}">Profile</a>
-        {% if request.user.is_staff %}
-        <a href="{% url 'moderation_admin:index' %}" style="..."
-          >Content Moderation</a
-        >
-        <a href="{% url 'admin:auth_user_changelist' %}" style="..."
-          >User Management</a
-        >
-        {% endif %}
-        <a href="{% url 'logout' %}">Logout</a>
-        {% else %}
-        <a href="{% url 'signup' %}">Signup</a>
-        <a href="{% url 'login' %}">Login</a>
-        {% endif %}
-        <!-- Mobile Sidebar Toggle -->
-        <button class="openbtn" onclick="openNav()">☰ Menu</button>
+        <div class="right">
+          <!-- Desktop Navbar Links -->
+          <a href="{% url 'home' %}">Home</a>
+          <a href="{% url 'post_list' %}">Posts</a>
+          {% if user.is_authenticated %}
+          <a href="{% url 'create_post' %}">Create Post</a>
+          {% if request.user.is_staff %}
+          <a href="{% url 'moderation_admin:index' %}">Content Moderation</a>
+          <a href="{% url 'admin:auth_user_changelist' %}">User Management</a>
+          {% endif %}
+          
+          <a href="{% url 'logout' %}">Logout</a>
+          <!-- Search Icon -->
+          <i class="fas fa-search search-icon" onclick="toggleSearchBar()"></i>
+          <a href="{% url 'profile' %}" class="avatar-button">
+            {% if user.userprofile.avatar %}
+            <img src="{{ user.userprofile.avatar.url }}" alt="User Avatar" class="avatar-img" />
+            {% else %}
+            <i class="fas fa-user-circle avatar-icon"></i>
+            {% endif %}
+          </a>
+          {% else %}
+          <a href="{% url 'signup' %}">Signup</a>
+          <a href="{% url 'login' %}">Login</a>
+          {% endif %}
+          <!-- Mobile Sidebar Toggle -->
+          <button class="openbtn" onclick="openNav()">☰ Menu</button>
+        </div>
       </div>
     </nav>
+
+    <!-- Search Bar -->
+    {% if user.is_authenticated %}
+    {% block search_bar %}
+    <div class="search-bar" id="searchBar">
+      <form class="topnav" action="{% url 'search_posts' %}" method="get">
+        <input
+          type="text"
+          name="q"
+          placeholder="Search.."
+          value="{{ query|default:'' }}"
+        />
+        <button type="submit" class="btn btn-primary">Search</button>
+      </form>
+    </div>
+    {% endblock %}
+    {% endif %}
 
     <!-- Sidebar for Mobile -->
     <div id="mySidepanel" class="sidepanel">
@@ -70,12 +77,8 @@
       <a href="{% url 'create_post' %}">Create Post</a>
       <a href="{% url 'profile' %}">Profile</a>
       {% if request.user.is_staff %}
-      <a href="{% url 'moderation_admin:index' %}" style="..."
-        >Content Moderation</a
-      >
-      <a href="{% url 'admin:auth_user_changelist' %}" style="..."
-        >User Management</a
-      >
+      <a href="{% url 'moderation_admin:index' %}">Content Moderation</a>
+      <a href="{% url 'admin:auth_user_changelist' %}">User Management</a>
       {% endif %}
       <a href="{% url 'logout' %}">Logout</a>
       {% else %}
@@ -83,8 +86,6 @@
       <a href="{% url 'login' %}">Login</a>
       {% endif %}
     </div>
-
-    {% comment %} {% endcomment %}
 
     <!-- Main Content -->
     <div class="container">{% block content %} {% endblock %}</div>
@@ -97,17 +98,6 @@
             Discover, create, and share stories with Blog Platform featuring AI
             content moderation for better content safety!
           </p>
-          {% comment %}
-          <form class="topnav" action="{% url 'search_posts' %}" method="get">
-            <input
-              type="text"
-              name="q"
-              placeholder="Search.."
-              value="{{ query|default:'' }}"
-            />
-            <button type="submit" class="btn btn-primary">Search</button>
-          </form>
-          {% endcomment %}
         </div>
         <div class="footer-section footer-links">
           <h3>Explore</h3>
@@ -118,16 +108,13 @@
             <li><a href="{% url 'create_post' %}">Create Post</a></li>
             {% if request.user.is_staff %}
             <li>
-              <a href="{% url 'moderation_admin:index' %}" style="..."
-                >Content Moderation</a
-              >
+              <a href="{% url 'moderation_admin:index' %}">Content Moderation</a>
             </li>
             <li>
-              <a href="{% url 'admin:auth_user_changelist' %}" style="..."
-                >User Management</a
-              >
+              <a href="{% url 'admin:auth_user_changelist' %}">User Management</a>
             </li>
-            {% endif %} {% else %}
+            {% endif %}
+            {% else %}
             <li><a href="{% url 'signup' %}">Join Us</a></li>
             {% endif %}
           </ul>
@@ -154,10 +141,10 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <p>&copy; {% now "Y" %} Blog Platform. All rights reserved.</p>
+        <p>© {% now "Y" %} Blog Platform. All rights reserved.</p>
       </div>
     </footer>
-    <!-- JavaScript for Sidebar Toggle -->
+    <!-- JavaScript for Sidebar Toggle and Search Bar -->
     <script>
       function openNav() {
         document.getElementById("mySidepanel").style.width = "250px";
@@ -165,6 +152,11 @@
 
       function closeNav() {
         document.getElementById("mySidepanel").style.width = "0";
+      }
+
+      function toggleSearchBar() {
+        const searchBar = document.getElementById("searchBar");
+        searchBar.classList.toggle("active");
       }
     </script>
   </body>

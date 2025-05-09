@@ -3,6 +3,8 @@ from django import forms
 from .models import Post, UserPreference, Profile
 from taggit.forms import TagWidget
 from django.contrib.auth import get_user_model
+from .models import UserProfile
+from django.contrib.auth.models import User
 
 User = get_user_model()
 
@@ -49,3 +51,13 @@ class ProfileForm(forms.ModelForm):
             self.user.email = self.cleaned_data['email']
             self.user.save()
         return profile
+    
+class AvatarUploadForm(forms.ModelForm):
+    class Meta:
+        model = UserProfile
+        fields = ['avatar']
+
+class UserUpdateForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['username', 'email']

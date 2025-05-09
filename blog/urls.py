@@ -12,6 +12,8 @@ urlpatterns = [
     path('preferences/', views.user_preferences, name='user_preferences'),
     path('search/', views.search_posts, name='search_posts'),
     path('profile/', views.profile, name='profile'),
+    path('settings/', views.user_settings, name='user_settings'),
+    path('my-posts/', views.user_posts, name='user_posts'),
     path('ajax/search/', views.ajax_search, name='ajax_search'),
     path('logout/', views.logout_user, name='logout'),
 ]

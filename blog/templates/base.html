@@ -6,12 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="media/favicon/icon.png" />
     <title>{% block title %}Blog Platform{% endblock %}</title>
-    <link rel="icon" type="image/x-icon" href="/media/favicon/icon.png" />
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
-    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
   </head>
   <body>
     <!-- Navbar -->
@@ -21,32 +17,36 @@
           <a href="{% url 'home' %}" class="navbar-brand">Blog Platform</a>
         </div>
         <div class="right">
-          <!-- Desktop Navbar Links -->
           <a href="{% url 'home' %}">Home</a>
           <a href="{% url 'post_list' %}">Posts</a>
           {% if user.is_authenticated %}
           <a href="{% url 'create_post' %}">Create Post</a>
-          {% if request.user.is_staff %}
-          <a href="{% url 'moderation_admin:index' %}">Content Moderation</a>
-          <a href="{% url 'admin:auth_user_changelist' %}">User Management</a>
-          {% endif %}
-          
-          <a href="{% url 'logout' %}">Logout</a>
-          <!-- Search Icon -->
-          <i class="fas fa-search search-icon" onclick="toggleSearchBar()"></i>
-          <a href="{% url 'profile' %}" class="avatar-button">
-            {% if user.userprofile.avatar %}
-            <img src="{{ user.userprofile.avatar.url }}" alt="User Avatar" class="avatar-img" />
-            {% else %}
-            <i class="fas fa-user-circle avatar-icon"></i>
-            {% endif %}
-          </a>
+          <div class="avatar-dropdown">
+            <button class="avatar-button" aria-haspopup="true" aria-expanded="false" onclick="toggleDropdown()" onkeydown="handleKeydown(event)">
+              {% if user.userprofile.avatar %}
+              <img src="{{ user.userprofile.avatar.url }}" alt="User Avatar" class="avatar-img" />
+              {% else %}
+              <i class="fas fa-user-circle avatar-icon" aria-hidden="true"></i>
+              {% endif %}
+              <span class="sr-only">User Menu</span>
+            </button>
+            <div class="dropdown-menu" id="avatarDropdown">
+              <a href="{% url 'profile' %}">Profile</a>
+              <a href="{% url 'user_settings' %}">Settings</a>
+              <a href="{% url 'user_posts' %}">My Posts</a>
+              {% if request.user.is_staff %}
+              <a href="{% url 'moderation_admin:index' %}">Content Moderation</a>
+              <a href="{% url 'admin:auth_user_changelist' %}">User Management</a>
+              {% endif %}
+              <a href="{% url 'logout' %}">Logout</a>
+            </div>
+          </div>
+          <i class="fas fa-search search-icon" onclick="toggleSearchBar()" aria-label="Toggle search bar"></i>
           {% else %}
           <a href="{% url 'signup' %}">Signup</a>
           <a href="{% url 'login' %}">Login</a>
           {% endif %}
-          <!-- Mobile Sidebar Toggle -->
-          <button class="openbtn" onclick="openNav()">☰ Menu</button>
+          <button class="openbtn" onclick="openNav()" aria-label="Open mobile menu">☰ Menu</button>
         </div>
       </div>
     </nav>
@@ -56,12 +56,7 @@
     {% block search_bar %}
     <div class="search-bar" id="searchBar">
       <form class="topnav" action="{% url 'search_posts' %}" method="get">
-        <input
-          type="text"
-          name="q"
-          placeholder="Search.."
-          value="{{ query|default:'' }}"
-        />
+        <input type="text" name="q" placeholder="Search.." value="{{ query|default:'' }}" aria-label="Search posts" />
         <button type="submit" class="btn btn-primary">Search</button>
       </form>
     </div>
@@ -70,12 +65,14 @@
 
     <!-- Sidebar for Mobile -->
     <div id="mySidepanel" class="sidepanel">
-      <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+      <a href="javascript:void(0)" class="closebtn" onclick="closeNav()" aria-label="Close mobile menu">×</a>
       <a href="{% url 'home' %}">Home</a>
       <a href="{% url 'post_list' %}">Posts</a>
       {% if user.is_authenticated %}
       <a href="{% url 'create_post' %}">Create Post</a>
       <a href="{% url 'profile' %}">Profile</a>
+      <a href="{% url 'user_settings' %}">Settings</a>
+      <a href="{% url 'user_posts' %}">My Posts</a>
       {% if request.user.is_staff %}
       <a href="{% url 'moderation_admin:index' %}">Content Moderation</a>
       <a href="{% url 'admin:auth_user_changelist' %}">User Management</a>
@@ -89,15 +86,13 @@
 
     <!-- Main Content -->
     <div class="container">{% block content %} {% endblock %}</div>
+
     <!-- Footer -->
     <footer class="footer">
       <div class="footer-container">
         <div class="footer-section footer-about">
           <h3>Blog Platform</h3>
-          <p>
-            Discover, create, and share stories with Blog Platform featuring AI
-            content moderation for better content safety!
-          </p>
+          <p>Discover, create, and share stories with Blog Platform featuring AI content moderation!</p>
         </div>
         <div class="footer-section footer-links">
           <h3>Explore</h3>
@@ -106,13 +101,11 @@
             <li><a href="{% url 'post_list' %}">Posts</a></li>
             {% if user.is_authenticated %}
             <li><a href="{% url 'create_post' %}">Create Post</a></li>
+            <li><a href="{% url 'user_settings' %}">Settings</a></li>
+            <li><a href="{% url 'user_posts' %}">My Posts</a></li>
             {% if request.user.is_staff %}
-            <li>
-              <a href="{% url 'moderation_admin:index' %}">Content Moderation</a>
-            </li>
-            <li>
-              <a href="{% url 'admin:auth_user_changelist' %}">User Management</a>
-            </li>
+            <li><a href="{% url 'moderation_admin:index' %}">Content Moderation</a></li>
+            <li><a href="{% url 'admin:auth_user_changelist' %}">User Management</a></li>
             {% endif %}
             {% else %}
             <li><a href="{% url 'signup' %}">Join Us</a></li>
@@ -122,21 +115,10 @@
         <div class="footer-section footer-social">
           <h3>Connect</h3>
           <div class="social-icons">
-            <a href="https://twitter.com" target="_blank" aria-label="Twitter"
-              ><i class="fab fa-twitter"></i
-            ></a>
-            <a href="https://facebook.com" target="_blank" aria-label="Facebook"
-              ><i class="fab fa-facebook-f"></i
-            ></a>
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              aria-label="Instagram"
-              ><i class="fab fa-instagram"></i
-            ></a>
-            <a href="https://linkedin.com" target="_blank" aria-label="LinkedIn"
-              ><i class="fab fa-linkedin-in"></i
-            ></a>
+            <a href="https://twitter.com" target="_blank" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="https://facebook.com" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://instagram.com" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://linkedin.com" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
           </div>
         </div>
       </div>
@@ -144,20 +126,40 @@
         <p>© {% now "Y" %} Blog Platform. All rights reserved.</p>
       </div>
     </footer>
-    <!-- JavaScript for Sidebar Toggle and Search Bar -->
+
+    <!-- JavaScript -->
     <script>
       function openNav() {
         document.getElementById("mySidepanel").style.width = "250px";
       }
-
       function closeNav() {
         document.getElementById("mySidepanel").style.width = "0";
       }
-
       function toggleSearchBar() {
-        const searchBar = document.getElementById("searchBar");
-        searchBar.classList.toggle("active");
+        document.getElementById("searchBar").classList.toggle("active");
       }
+      function toggleDropdown() {
+        const dropdown = document.getElementById("avatarDropdown");
+        const button = document.querySelector(".avatar-button");
+        const isExpanded = button.getAttribute("aria-expanded") === "true";
+        dropdown.classList.toggle("show");
+        button.setAttribute("aria-expanded", !isExpanded);
+      }
+      function handleKeydown(event) {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          toggleDropdown();
+        }
+      }
+      // Close dropdown when clicking outside
+      document.addEventListener("click", function(event) {
+        const dropdown = document.getElementById("avatarDropdown");
+        const button = document.querySelector(".avatar-button");
+        if (!button.contains(event.target) && !dropdown.contains(event.target)) {
+          dropdown.classList.remove("show");
+          button.setAttribute("aria-expanded", "false");
+        }
+      });
     </script>
   </body>
 </html>

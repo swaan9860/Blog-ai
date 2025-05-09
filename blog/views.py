@@ -7,8 +7,8 @@ from django.utils.text import slugify
 from django.contrib import messages
 from django.db.models import Q
 from django.contrib.auth import get_user_model
-from .models import Post, Profile, UserPreference, PostInteraction
-from .forms import PostForm, CommentForm, ProfileForm, UserPreferenceForm
+from .models import Post, Profile, UserPreference, PostInteraction, UserProfile
+from .forms import PostForm, CommentForm, ProfileForm, UserPreferenceForm, AvatarUploadForm, UserUpdateForm
 from moderation.models import FlaggedContent
 from moderation.utils import moderate_content
 from moderation.keyword_moderation import moderate_keywords
@@ -20,15 +20,7 @@ User = get_user_model()
 
 def home(request):
     recent_posts = Post.objects.filter(is_published=True).order_by('-created_at')[:3]
-    features = [
-        {'icon': 'fas fa-brain', 'title': 'AI Moderation', 'description': 'Our advanced AI ensures safe and respectful content.'},
-        {'icon': 'fas fa-tags', 'title': 'Tagging System', 'description': 'Organize and discover posts with ease.'},
-        {'icon': 'fas fa-user', 'title': 'Personalized Profiles', 'description': 'Customize your experience and showcase your posts.'},
-    ]
-    return render(request, 'blog/home.html', {'recent_posts': recent_posts, 'features': features})
-
-def home(request):
-    recent_posts = Post.objects.filter(is_published=True).order_by('-created_at')[:3]
+    no_posts_message = "No posts available. Be the first to share!" if not recent_posts else None
     recommended_posts = None
     if request.user.is_authenticated:
         try:
@@ -44,14 +36,8 @@ def home(request):
             pass
     return render(request, 'blog/home.html', {
         'recent_posts': recent_posts,
+        'no_posts_message': no_posts_message,
         'recommended_posts': recommended_posts
-    })
-def home(request):
-    recent_posts = Post.objects.filter(is_published=True).order_by('-created_at')[:3]
-    no_posts_message = "No posts available. Be the first to share!" if not recent_posts else None
-    return render(request, 'blog/home.html', {
-        'recent_posts': recent_posts,
-        'no_posts_message': no_posts_message
     })
 
 def post_list(request):
@@ -219,7 +205,7 @@ def edit_post(request, slug):
         if form.is_valid():
             updated_post = form.save(commit=False)
             text_to_moderate = f"{updated_post.title} {updated_post.content}"
-            ai_flagged, ai_score, ai_reason = moderate_content(text_to_moderate)  # Added NLP
+            ai_flagged, ai_score, ai_reason = moderate_content(text_to_moderate)
             try:
                 is_flagged, matches, kw_score = moderate_keywords(text_to_moderate)
                 ai_score = float(ai_score) if ai_score is not None else 0.0
@@ -281,39 +267,46 @@ def user_preferences(request):
 
 @login_required
 def profile(request):
-    try:
-        preference = request.user.userpreference
-        preferred_tags = preference.preferred_tags.names()
-    except UserPreference.DoesNotExist:
-        preference = UserPreference(user=request.user)
-        preference.save()
-        preferred_tags = []
-    try:
-        profile = request.user.profile
-    except Profile.DoesNotExist:
-        profile = Profile(user=request.user)
-        profile.save()
-    user_posts = Post.objects.filter(author=request.user).exclude(slug__exact='').order_by('-created_at')
+    user_profile, created = UserProfile.objects.get_or_create(user=request.user)
     if request.method == 'POST':
-        profile_form = ProfileForm(request.POST, request.FILES, instance=profile, user=request.user)
-        pref_form = UserPreferenceForm(request.POST, instance=preference)
-        if profile_form.is_valid() and pref_form.is_valid():
-            profile_form.save()
-            pref_form.save()
-            messages.success(request, 'Profile updated successfully!')
+        form = AvatarUploadForm(request.POST, request.FILES, instance=user_profile)
+        if form.is_valid():
+            form.save()
             return redirect('profile')
     else:
-        profile_form = ProfileForm(instance=profile, user=request.user)
-        pref_form = UserPreferenceForm(instance=preference)
-    return render(request, 'users/profile.html', {
-        'user_posts': user_posts,
-        'preferred_tags': preferred_tags,
-        'profile_form': profile_form,
-        'pref_form': pref_form,
-        'profile': profile
+        form = AvatarUploadForm(instance=user_profile)
+    return render(request, 'blog/profile.html', {'form': form})
+
+@login_required
+def user_settings(request):
+    user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+    if request.method == 'POST':
+        if 'avatar_submit' in request.POST:
+            avatar_form = AvatarUploadForm(request.POST, request.FILES, instance=user_profile)
+            user_form = UserUpdateForm(instance=request.user)
+            if avatar_form.is_valid():
+                avatar_form.save()
+                messages.success(request, 'Avatar updated!')
+                return redirect('user_settings')
+        elif 'profile_submit' in request.POST:
+            user_form = UserUpdateForm(request.POST, instance=request.user)
+            avatar_form = AvatarUploadForm(instance=user_profile)
+            if user_form.is_valid():
+                user_form.save()
+                messages.success(request, 'Profile updated!')
+                return redirect('user_settings')
+    else:
+        avatar_form = AvatarUploadForm(instance=user_profile)
+        user_form = UserUpdateForm(instance=request.user)
+    return render(request, 'blog/user_settings.html', {
+        'avatar_form': avatar_form,
+        'user_form': user_form
     })
 
-
+@login_required
+def user_posts(request):
+    posts = Post.objects.filter(author=request.user).order_by('-created_at')
+    return render(request, 'blog/user_posts.html', {'posts': posts})
 
 def search_posts(request):
     query = request.GET.get('q', '')
@@ -330,6 +323,7 @@ def search_posts(request):
         'posts': posts,
     }
     return render(request, 'blog/search_results.html', context)
+
 @login_required
 def logout_user(request):
     logout(request)

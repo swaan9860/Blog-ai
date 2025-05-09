@@ -7,8 +7,8 @@
     {% for post in posts %}
         {% if post.is_published or post.author == user %}
             <div class="card mb-3">
-                {% if post.picture %}
-                    <img src="{{ post.picture.url }}" class="card-img-top" alt="{{ post.title }}">
+                {% if post.image %}
+                    <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}">
                 {% else %}
                     <img src="{% static 'images/placeholder.jpg' %}" class="card-img-top" alt="Placeholder">
                 {% endif %}
@@ -48,8 +48,8 @@
             {% for post in recommended_posts %}
                 <div class="col-md-6 mb-4">
                     <div class="card">
-                        {% if post.picture %}
-                            <img src="{{ post.picture.url }}" class="card-img-top" alt="{{ post.title }}">
+                        {% if post.image %}
+                            <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}">
                         {% else %}
                             <img src="{% static 'images/placeholder.jpg' %}" class="card-img-top" alt="Placeholder">
                         {% endif %}

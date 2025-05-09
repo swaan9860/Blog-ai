@@ -1,6 +1,7 @@
 # BlogAI/blog/models.py
 from django.db import models
 from django.contrib.auth import get_user_model
+from networkx import reverse
 from taggit.managers import TaggableManager
 from django.utils.text import slugify
 from django.contrib.auth.models import User
@@ -16,6 +17,7 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     slug = models.SlugField(unique=True, blank=True)
     tags = TaggableManager(blank=True)
+    category = models.CharField(max_length=50, default="Uncategorized")  # New field
     is_published = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):
@@ -69,3 +71,9 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return self.user.username
+    
+    def __str__(self):
+        return self.title
+
+    def get_absolute_url(self):
+        return reverse('post_detail', kwargs={'slug': self.slug})

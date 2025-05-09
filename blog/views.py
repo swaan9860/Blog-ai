@@ -205,32 +205,40 @@ def edit_post(request, slug):
         if form.is_valid():
             updated_post = form.save(commit=False)
             text_to_moderate = f"{updated_post.title} {updated_post.content}"
-            ai_flagged, ai_score, ai_reason = moderate_content(text_to_moderate)
             try:
-                is_flagged, matches, kw_score = moderate_keywords(text_to_moderate)
+                # AI-based moderation
+                ai_flagged, ai_score, ai_reason = moderate_content(text_to_moderate)
+                # Keyword-based moderation
+                kw_flagged, kw_matches, kw_score = moderate_keywords(text_to_moderate)
                 ai_score = float(ai_score) if ai_score is not None else 0.0
                 kw_score = float(kw_score) if kw_score is not None else 0.0
-                if ai_flagged or is_flagged:
+                if ai_flagged or kw_flagged:
+                    # Flag the post
                     updated_post.is_published = False
                     updated_post.save()
                     form.save_m2m()
-                    reason = f"{ai_reason}; Inappropriate phrase: {', '.join(matches)}" if ai_flagged and is_flagged else (ai_reason if ai_flagged else f"Inappropriate phrase: {', '.join(matches)}")
+                    reason = f"{ai_reason}; Inappropriate phrase: {', '.join(kw_matches)}" if ai_flagged and kw_flagged else (ai_reason if ai_flagged else f"Inappropriate phrase: {', '.join(kw_matches)}")
                     score = max(ai_score, kw_score)
-                    FlaggedContent.objects.create(
+                    # Create or update FlaggedContent
+                    FlaggedContent.objects.update_or_create(
                         post=updated_post,
                         user=request.user,
-                        reason=reason,
-                        score=score
+                        defaults={'reason': reason, 'score': score}
                     )
-                    messages.warning(request, f'Post flagged for review (Score: {score})')
+                    messages.warning(request, f'Post flagged for review due to potential inappropriate content (Score: {score})')
                     return redirect('post_list')
-                updated_post.slug = slug
-                updated_post.save()
-                form.save_m2m()
-                messages.success(request, 'Post updated!')
-                return redirect(post.get_absolute_url())
+                else:
+                    # Unflag the post
+                    updated_post.is_published = True
+                    updated_post.save()
+                    form.save_m2m()
+                    # Remove any existing FlaggedContent
+                    FlaggedContent.objects.filter(post=updated_post, user=request.user).delete()
+                    messages.success(request, 'Post updated and cleared of any flags!')
+                    return redirect(post.get_absolute_url())
             except Exception as e:
                 messages.error(request, f'Error during moderation: {str(e)}')
+                return render(request, 'blog/post_edit.html', {'form': form, 'post': post})
         else:
             messages.error(request, 'Form validation failed. Please check your inputs.')
     else:

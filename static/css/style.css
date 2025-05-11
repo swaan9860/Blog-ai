@@ -1240,3 +1240,118 @@ a:hover {
       padding: 10px;
   }
 }
+/* Moderation Section Styling */
+.container {
+  max-width: 100%;
+  width: 90%;
+  margin: 0 auto;
+  padding: 1.5rem;
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.container:hover {
+  transform: translateY(-5px);
+}
+
+h3 {
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  font-weight: 700;
+  color: #F4E4A3; /* Mustard Yellow */
+  margin-bottom: 1rem;
+  position: relative;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+h3::after {
+  content: '';
+  width: 60px;
+  height: 4px;
+  background: #F4E4A3; /* Mustard Yellow */
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+}
+
+p {
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  color: #2F2F2F; /* Charcoal */
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+p small {
+  font-size: clamp(0.75rem, 1.8vw, 0.875rem);
+  color: #A0AEC0; /* Gray */
+  font-style: italic;
+}
+
+p:nth-child(3) { /* Category */
+  font-weight: 600;
+  color: #3C4C3F; /* Olive Green */
+}
+
+p:nth-child(4) { /* Tags */
+  font-style: italic;
+  color: #A0AEC0; /* Gray */
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  margin-right: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background: #F4E4A3; /* Mustard Yellow */
+  color: #2F2F2F; /* Charcoal */
+  border: none;
+}
+
+.btn-primary:hover {
+  background: #FFF8D6; /* Lighter Mustard Yellow */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-danger {
+  background: #EF4444; /* Red */
+  color: #FFFFFF;
+  border: none;
+}
+
+.btn-danger:hover {
+  background: #DC3545; /* Darker Red */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 576px) {
+  .container {
+    padding: 1rem;
+  }
+
+  h3 {
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+  }
+
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: clamp(0.75rem, 1.8vw, 0.875rem);
+  }
+}
+
+@media (min-width: 577px) and (max-width: 768px) {
+  .container {
+    width: 92%;
+  }
+}

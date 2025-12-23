@@ -1,13 +1,15 @@
-# BlogAI/blog/admin.py
+# blog/admin.py
 from django.contrib import admin
-from .models import Post, UserPreference, PostInteraction, Profile
+from .models import Post, UserPreference, PostInteraction, UserProfile
+
+
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
     list_display = ['title', 'author', 'created_at', 'is_published']
-    list_filter = ['is_published', 'created_at']
     search_fields = ['title', 'content']
     list_per_page = 25
+
 
 @admin.register(UserPreference)
 class UserPreferenceAdmin(admin.ModelAdmin):
@@ -15,8 +17,9 @@ class UserPreferenceAdmin(admin.ModelAdmin):
     search_fields = ['user__username']
 
     def get_preferred_tags(self, obj):
-        return ", ".join(obj.preferred_tags.names()) or "None"
+        return ", ".join([t.name for t in obj.preferred_tags.all()]) or "None"
     get_preferred_tags.short_description = 'Preferred Tags'
+
 
 @admin.register(PostInteraction)
 class PostInteractionAdmin(admin.ModelAdmin):
@@ -24,7 +27,8 @@ class PostInteractionAdmin(admin.ModelAdmin):
     list_filter = ['viewed']
     search_fields = ['user__username', 'post__title']
 
-@admin.register(Profile)
-class ProfileAdmin(admin.ModelAdmin):
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
     list_display = ['user', 'avatar']
     search_fields = ['user__username']

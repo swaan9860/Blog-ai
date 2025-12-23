@@ -1,63 +1,105 @@
-# BlogAI/blog/forms.py
+# blog/forms.py
+
 from django import forms
-from .models import Post, UserPreference, Profile
+from .models import Post, UserPreference, UserProfile, Comment
 from taggit.forms import TagWidget
-from django.contrib.auth import get_user_model
-from .models import UserProfile
 from django.contrib.auth.models import User
 
-User = get_user_model()
 
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
         fields = ['title', 'content', 'picture', 'tags']
         widgets = {
-            'tags': TagWidget(),
+            'title': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter a catchy title...'
+            }),
+            'content': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 10,
+                'placeholder': 'Write your post content here...'
+            }),
+            'picture': forms.FileInput(attrs={
+                'class': 'form-control'
+            }),
+            'tags': TagWidget(attrs={
+                'class': 'form-control',
+                'placeholder': 'Add tags (e.g. travel, tech, food)'
+            }),
+        }
+        labels = {
+            'title': 'Title',
+            'content': 'Content',
+            'picture': 'Featured Image (optional)',
+            'tags': 'Tags',
         }
 
-class CommentForm(forms.Form):
-    content = forms.CharField(widget=forms.Textarea)
+
+class CommentForm(forms.ModelForm):
+    """
+    Now a ModelForm so it has .save() method.
+    Used for both new comments and replies.
+    """
+    class Meta:
+        model = Comment
+        fields = ['content']
+        widgets = {
+            'content': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Write your comment...',
+                'required': 'required'
+            }),
+        }
+        labels = {
+            'content': '',
+        }
+
 
 class UserPreferenceForm(forms.ModelForm):
     class Meta:
         model = UserPreference
         fields = ['preferred_tags']
         widgets = {
-            'preferred_tags': TagWidget(),
+            'preferred_tags': TagWidget(attrs={
+                'class': 'form-control',
+                'placeholder': 'Add tags you like (e.g. technology, health, food)'
+            }),
+        }
+        labels = {
+            'preferred_tags': 'Preferred Tags',
         }
 
-class ProfileForm(forms.ModelForm):
-    username = forms.CharField(max_length=150, required=True)
-    email = forms.EmailField(required=True)
 
-    class Meta:
-        model = Profile
-        fields = ['avatar']
-
-    def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user', None)
-        super().__init__(*args, **kwargs)
-        if self.user:
-            self.fields['username'].initial = self.user.username
-            self.fields['email'].initial = self.user.email
-
-    def save(self, commit=True):
-        profile = super().save(commit=False)
-        if commit:
-            profile.save()
-            # Update user details
-            self.user.username = self.cleaned_data['username']
-            self.user.email = self.cleaned_data['email']
-            self.user.save()
-        return profile
-    
 class AvatarUploadForm(forms.ModelForm):
     class Meta:
         model = UserProfile
         fields = ['avatar']
+        widgets = {
+            'avatar': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+        }
+        labels = {
+            'avatar': 'Choose Avatar',
+        }
+
 
 class UserUpdateForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['username', 'email']
+        widgets = {
+            'username': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control'
+            }),
+        }
+        labels = {
+            'username': 'Username',
+            'email': 'Email Address',
+        }

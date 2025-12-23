@@ -4,44 +4,65 @@
 {% block content %}
 <div class="container">
     <h2>All Posts</h2>
-    {% for post in posts %}
-        {% if post.is_published or post.author == user %}
-            <div class="card mb-3">
-                {% if post.image %}
-                    <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}">
-                {% else %}
-                    <img src="{% static 'images/placeholder.jpg' %}" class="card-img-top" alt="Placeholder">
-                {% endif %}
-                <div class="card-body">
-                    <h3 class="card-title">
-                        <a href="{% url 'post_detail' post.slug %}">{{ post.title }}</a>
-                    </h3>
-                    <p class="card-text">{{ post.content|truncatewords:30 }}</p>
-                    <small class="text-muted">By {{ post.author.username }} on {{ post.created_at|date:"M d, Y" }}</small>
-                    {% if post.tags.all %}
-                        <p class="card-text tags">Tags: 
-                            {% for tag in post.tags.all %}
-                                <a href="{% url 'search_posts' %}?q={{ tag.name }}">{{ tag.name }}</a>{% if not forloop.last %}, {% endif %}
-                            {% endfor %}
-                        </p>
-                    {% endif %}
-                    {% if post.author == user %}
-                        <a href="{% url 'edit_post' post.slug %}" class="btn btn-primary">Edit</a>
-                        <a href="{% url 'delete_post' post.slug %}" class="btn btn-danger">Delete</a>
-                    {% endif %}
-                    {% if not post.is_published %}
-                        {% with flagged=post.flaggedcontent_set.first %}
-                            {% if flagged %}
-                                <p class="text-danger">This post is flagged and awaiting review (Toxicity Score: {{ flagged.score|floatformat:2 }}).</p>
-                            {% else %}
-                                <p class="text-danger">This post is flagged and awaiting review.</p>
-                            {% endif %}
-                        {% endwith %}
-                    {% endif %}
-                </div>
-            </div>
+    {% for item in posts_with_sentiment %}
+    {% with post=item.post score=item.sentiment_score %}
+    <div class="card mb-3">
+        {% if post.picture %}
+            <img src="{{ post.picture.url }}" class="card-img-top" alt="{{ post.title }}">
+        {% else %}
+            <img src="{% static 'images/placeholder.jpg' %}" class="card-img-top" alt="Placeholder">
         {% endif %}
-    {% endfor %}
+        <div class="card-body">
+            <h3 class="card-title">
+                <a href="{% url 'post_detail' post.slug %}">{{ post.title }}</a>
+            </h3>
+            <p class="card-text">{{ post.content|truncatewords:30 }}</p>
+            
+            <!-- Sentiment Display -->
+            <div class="mb-2">
+                <small class="fw-bold">Sentiment: </small>
+                <span class="
+                    {% if score > 0.3 %}text-success
+                    {% elif score > -0.3 %}text-warning
+                    {% else %}text-danger{% endif %}
+                ">
+                    {% if score > 0.6 %}😊 Very Positive
+                    {% elif score > 0.3 %}🙂 Positive
+                    {% elif score > 0.1 %}😐 Slightly Positive
+                    {% elif score > -0.1 %}😐 Neutral
+                    {% elif score > -0.3 %}😕 Slightly Negative
+                    {% elif score > -0.6 %}😟 Negative
+                    {% else %}😠 Very Negative{% endif %}
+                    ({{ score|floatformat:2 }})
+                </span>
+            </div>
+
+            <small class="text-muted">By {{ post.author.username }} on {{ post.created_at|date:"M d, Y" }}</small>
+            
+            {% if post.tags.all %}
+                <p class="card-text tags">Tags: 
+                    {% for tag in post.tags.all %}
+                        <a href="{% url 'search_posts' %}?q={{ tag.name }}">{{ tag.name }}</a>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+            {% endif %}
+
+            {% if post.author == user %}
+                <a href="{% url 'edit_post' post.slug %}" class="btn btn-primary">Edit</a>
+                <a href="{% url 'delete_post' post.slug %}" class="btn btn-danger">Delete</a>
+            {% endif %}
+            
+            {% if not post.is_published %}
+                {% with flagged=post.flaggedcontent_set.first %}
+                    {% if flagged %}
+                        <p class="text-danger">Flagged (Toxicity: {{ flagged.score|floatformat:2 }})</p>
+                    {% endif %}
+                {% endwith %}
+            {% endif %}
+        </div>
+    </div>
+    {% endwith %}
+{% endfor %}
     {% if recommended_posts %}
         <h2>Recommended Posts</h2>
         <div class="row">
@@ -49,7 +70,7 @@
                 <div class="col-md-6 mb-4">
                     <div class="card">
                         {% if post.image %}
-                            <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.title }}">
+                            <img src="{{ post.picture.url }}" class="card-img-top" alt="{{ post.title }}">
                         {% else %}
                             <img src="{% static 'images/placeholder.jpg' %}" class="card-img-top" alt="Placeholder">
                         {% endif %}

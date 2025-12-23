@@ -1,0 +1,141 @@
+<!-- blog/templates/blog/profile_settings.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Profile & Settings{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm sticky-top" style="top: 2rem;">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Settings Menu</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><a href="#avatar-section" class="text-decoration-none">Update Avatar</a></li>
+                    <li class="list-group-item"><a href="#profile-section" class="text-decoration-none">Profile Information</a></li>
+                    <li class="list-group-item"><a href="#preferences-section" class="text-decoration-none">Content Preferences</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <h2 class="mb-5 text-center text-lg-start fw-bold text-primary">Profile & Settings</h2>
+
+            <!-- Success/Error Messages -->
+            {% if messages %}
+                <div class="mb-4">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Avatar Update Section -->
+            <section id="avatar-section" class="card shadow-sm mb-5">
+                <div class="card-header bg-light">
+                    <h4 class="mb-0"><i class="fas fa-user-circle me-2"></i> Update Avatar</h4>
+                </div>
+                <div class="card-body text-center">
+                    <!-- Current Avatar Display -->
+                    {% if user.profile.avatar %}
+                        <img src="{{ user.profile.avatar.url }}"
+                             alt="Current Avatar"
+                             class="rounded-circle shadow mb-4"
+                             style="width: 160px; height: 160px; object-fit: cover;">
+                    {% else %}
+                        <div class="bg-light rounded-circle mx-auto d-flex align-items-center justify-content-center shadow mb-4"
+                             style="width: 160px; height: 160px;">
+                            <i class="fas fa-user fa-5x text-muted"></i>
+                        </div>
+                    {% endif %}
+
+                    <!-- Avatar Upload Form -->
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ avatar_form.as_p }}
+                        <button type="submit"
+                                name="avatar_submit"
+                                class="btn btn-primary px-5 mt-3">
+                            <i class="fas fa-upload me-2"></i> Upload New Avatar
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Profile Information Section -->
+            <section id="profile-section" class="card shadow-sm mb-5">
+                <div class="card-header bg-light">
+                    <h4 class="mb-0"><i class="fas fa-id-card me-2"></i> Profile Information</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Username</label>
+                                {{ profile_form.username }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Email</label>
+                                {{ profile_form.email }}
+                            </div>
+                        </div>
+                        <div class="text-end mt-4">
+                            <button type="submit"
+                                    name="profile_submit"
+                                    class="btn btn-primary px-5">
+                                <i class="fas fa-save me-2"></i> Save Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Content Preferences Section -->
+            <section id="preferences-section" class="card shadow-sm mb-5">
+                <div class="card-header bg-light">
+                    <h4 class="mb-0"><i class="fas fa-heart me-2"></i> Content Preferences</h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">
+                        Select tags you're interested in to improve your personalized recommendations.
+                    </p>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Preferred Tags</label>
+                            {{ preference_form.preferred_tags }}
+                        </div>
+                        <div class="text-end">
+                            <button type="submit"
+                                    name="preferences_submit"
+                                    class="btn btn-primary px-5">
+                                <i class="fas fa-check me-2"></i> Save Preferences
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<!-- Smooth Scroll for Sidebar -->
+<script>
+    document.querySelectorAll('.list-group-item a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+</script>
+{% endblock %}

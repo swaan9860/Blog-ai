@@ -1,0 +1,29 @@
+<!-- blog/templates/blog/comment_thread.html -->
+<div class="comment">  <!-- Removed reply-depth class entirely -->
+    <div class="d-flex">
+        <div class="flex-shrink-0">
+            {% if comment.author.userprofile.avatar %}
+                <img src="{{ comment.author.userprofile.avatar.url }}" class="rounded-circle" width="45" height="45" alt="{{ comment.author.username }}">
+            {% else %}
+                <i class="fas fa-user-circle fa-3x text-muted"></i>
+            {% endif %}
+        </div>
+        <div class="flex-grow-1 ms-3">
+            <strong>{{ comment.author.username }}</strong>
+            <small class="text-muted ms-2">{{ comment.created_at|date:"M d, Y H:i" }}</small>
+            <p class="mt-2 mb-1">{{ comment.content|linebreaks }}</p>
+            {% if user.is_authenticated %}
+                <button type="button" onclick="replyTo({{ comment.id }})" class="btn btn-sm btn-outline-primary">Reply</button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recursive replies -->
+    {% if comment.replies.all %}
+        <div class="replies mt-3">
+            {% for reply in comment.replies.all %}
+                {% include "blog/comment_thread.html" with comment=reply %}
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>

@@ -4,28 +4,31 @@
 {% block title %}My Posts{% endblock %}
 
 {% block content %}
-<div class="container">
-  <h2>My Posts</h2>
-  {% if posts %}
-  <div class="post-grid">
-    {% for post in posts %}
-    {% with category=forloop.counter|add:-1|divisibleby:3|yesno:"Packing Tips,Flying Tips,Booking Travel" %}
-    <a href="{% url 'post_detail' post.slug %}" class="post-item" style="background-image: url('{{ post.image.url }}');">
-      {% if not post.image %}
-      <div class="placeholder" style="background: rgb(255, 255, 255);"></div>
-      {% endif %}
-      <div class="category-bar" style="background: #F4E4A3;">
-        <span class="category-label">{{ category }}</span>
-      </div>
-      <div class="post-overlay">
-        <h3>{{ post.title|truncatechars:30 }}</h3>
-      </div>
-    </a>
-    {% endwith %}
-    {% endfor %}
-  </div>
-  {% else %}
-  <p>You haven't created any posts yet. <a href="{% url 'create_post' %}">Create one now!</a></p>
-  {% endif %}
+<div class="container py-5">
+    <h2 class="mb-5 text-center">My Posts</h2>
+
+    {% if posts %}
+    <div class="post-grid">
+        {% for post in posts %}
+        <a href="{% url 'post_detail' post.slug %}" class="post-item" 
+           style="background-image: url('{% if post.picture %}{{ post.picture.url }}{% else %}{% static 'images/placeholder.jpg' %}{% endif %}');">
+            {% if not post.picture %}
+            <div class="placeholder"></div>
+            {% endif %}
+            <div class="post-overlay">
+                <h3>{{ post.title|truncatechars:40 }}</h3>
+                <p class="text-small text-muted mt-2">
+                    {{ post.created_at|date:"M d, Y" }}
+                </p>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <p class="lead text-muted">You haven't created any posts yet.</p>
+        <a href="{% url 'create_post' %}" class="btn btn-primary btn-lg">Create Your First Post</a>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
